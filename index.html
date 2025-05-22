@@ -1,0 +1,955 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="es"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Consola de HBase Simulada&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&amp;display=swap" rel="stylesheet"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Inter', sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #f3f4f6; /* Tailwind gray-100 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.console-output {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #1f2937; /* Tailwind gray-800 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e5e7eb; /* Tailwind gray-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>min-height: 300px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-height: 500px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow-y: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem; /* rounded-lg */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'monospace';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>white-space: pre-wrap; /* Preserve whitespace and wrap text */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>word-break: break-word; /* Break long words */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.console-input {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #374151; /* Tailwind gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e5e7eb; /* Tailwind gray-200 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.75rem 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'monospace';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.75rem 1.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: background-color 0.2s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-primary {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #3b82f6; /* Tailwind blue-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-primary:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #2563eb; /* Tailwind blue-600 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-secondary {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #6b7280; /* Tailwind gray-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.btn-secondary:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #4b5563; /* Tailwind gray-600 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.exercise-guide {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #dbeafe; /* Tailwind blue-100 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-left: 4px solid #3b82f6; /* Tailwind blue-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #1e40af; /* Tailwind blue-800 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.success-message {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #10b981; /* Tailwind green-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.error-message {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ef4444; /* Tailwind red-500 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.loading-spinner {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 4px solid rgba(255, 255, 255, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-top: 4px solid #fff;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>animation: spin 1s linear infinite;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>vertical-align: middle;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-left: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@keyframes spin {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>0% { transform: rotate(0deg); }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>100% { transform: rotate(360deg); }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.hbase-output-table {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-collapse: collapse;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.hbase-output-table th, .hbase-output-table td {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.25rem 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: left;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 1px solid #4b5563; /* Tailwind gray-600 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e5e7eb;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.hbase-output-table th {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #9ca3af; /* Tailwind gray-400 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.copy-code-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #2d3748; /* Darker gray for code block */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #e2e8f0; /* Lighter text for code */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.75rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.5rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 0.75rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Roboto Mono', monospace; /* Applied Roboto Mono */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.9em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.copy-code-container pre {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-grow: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>white-space: pre-wrap;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>word-break: break-all;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Roboto Mono', monospace; /* Applied Roboto Mono */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.copy-btn {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #4a5568; /* Gray-700 */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 0.5rem 0.75rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 0.375rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-left: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: background-color 0.2s;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 0.25rem;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.copy-btn:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #2d3748; /* Gray-800 */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="p-4 md:p-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-lg"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1 class="text-3xl font-bold text-gray-800 mb-6 text-center"&gt;Consola de HBase Simulada&lt;/h1&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="exercise-guide mb-6"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2 class="text-xl font-semibold mb-2"&gt;Guía del Ejercicio:&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p id="exercise-instruction"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="exercise-details" class="text-sm"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="exercise-examples-container" class="mt-3"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="console-output mb-4" id="console-output"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>Bienvenido a la consola de HBase simulada. ¡Escribe 'help' para ver los comandos!</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="flex flex-col sm:flex-row gap-4 mb-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="text" id="command-input" class="console-input flex-grow" placeholder="Escribe tu comando aquí..." onkeyup="handleInput(event)"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button id="run-command-btn" class="btn btn-primary flex-shrink-0"&gt;Ejecutar&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button id="next-exercise-btn" class="btn btn-secondary flex-shrink-0"&gt;Siguiente Ejercicio&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Estado de la simulación de HBase ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Representación en memoria de las tablas de HBase</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let hbaseData = {}; // { tableName: { enabled: true/false, columnFamilies: [], rows: { rowKey: { cf:col: value } } } }</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let currentExerciseIndex = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Elementos del DOM ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const consoleOutput = document.getElementById('console-output');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const commandInput = document.getElementById('command-input');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const runCommandBtn = document.getElementById('run-command-btn');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const nextExerciseBtn = document.getElementById('next-exercise-btn');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const exerciseInstruction = document.getElementById('exercise-instruction');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const exerciseDetails = document.getElementById('exercise-details');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const exerciseExamplesContainer = document.getElementById('exercise-examples-container');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Helper to parse scan options like {STARTROW =&gt; 'A', STOPROW =&gt; 'Z', COLUMNS =&gt; ['cf:q'], FILTER =&gt; "..."}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function parseScanOptions(optionsString) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const options = {};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Extract FILTER</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const filterMatch = optionsString.match(/FILTER\s*=&gt;\s*"([^"]*)"/i);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (filterMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options.filter = filterMatch[1];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Extract COLUMNS</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const columnsMatch = optionsString.match(/COLUMNS\s*=&gt;\s*\[([^\]]*)\]/i);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (columnsMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options.columns = columnsMatch[1].split(',').map(c =&gt; c.trim().replace(/'/g, '')).filter(c =&gt; c.length &gt; 0);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Extract STARTROW</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const startRowMatch = optionsString.match(/STARTROW\s*=&gt;\s*'([^']+)'/i);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (startRowMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options.startRow = startRowMatch[1];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Extract STOPROW</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const stopRowMatch = optionsString.match(/STOPROW\s*=&gt;\s*'([^']+)'/i);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (stopRowMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>options.stopRow = stopRowMatch[1];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return options;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Ejercicios Guiados ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const exercises = [</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 1: Crear una tabla. Usa el comando `create 'nombre_tabla', 'familia_columnas1', 'familia_columnas2', ...`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Crear una tabla llamada 'usuarios' para almacenar información básica (como el curso), de contacto y de dispositivo.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `create` se usa para definir una nueva tabla en HBase, especificando su nombre y las familias de columnas que contendrá. Las familias de columnas son agrupaciones lógicas y físicas de datos relacionados.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Debes especificar el nombre de la tabla y luego, entre comillas simples y separadas por comas, los nombres de las familias de columnas. En este caso, 'info', 'curso' y 'dispositivo'.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "create 'usuarios', 'info', 'curso', 'dispositivo'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^create\s+'\w+'(,\s*'\w+')*$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const match = command.match(/^create\s+'(\w+)'(,\s*'\w+')*$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = match[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const commandParts = (command.match(/'[^']+'|[^\s,]+/g) || []).filter(part =&gt; part !== ',');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const createdCFs = commandParts.slice(2).map(p =&gt; p.replace(/'/g, ''));</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return hbaseData[tableName] &amp;&amp; output.includes('Tabla creada') &amp;&amp;</p>
+<p class="p1"><span class="Apple-converted-space">                               </span>createdCFs.includes('info') &amp;&amp; createdCFs.includes('curso') &amp;&amp; createdCFs.includes('dispositivo');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 2: Insertar datos iniciales. Usa `put 'nombre_tabla', 'clave_fila', 'familia_columnas:calificador', 'valor', 'familia_columnas:calificador', 'valor', ...`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Añadir los primeros dos usuarios a la tabla 'usuarios', incluyendo el curso que estudian y el tipo de dispositivo que usan. La clave de fila (rowKey) será el identificador único del usuario. Puedes añadir múltiples columnas en un solo comando `put`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `put` se utiliza para insertar nuevos datos o actualizar datos existentes en una o varias celdas dentro de una fila específica de una tabla de HBase. Si la clave de fila y el calificador de columna ya existen, el valor se sobrescribe (o se crea una nueva versión si el versionado está habilitado).",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Especifica el nombre de la tabla, una clave de fila única (ej: 'maria', 'ana'), y luego pares de `familia_columnas:calificador` y `valor` para cada dato que quieras insertar en esa fila.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "put 'usuarios', 'maria', 'info:curso', 'Big Data', 'dispositivo:tipo', 'Mac'\nput 'usuarios', 'ana', 'info:curso', 'ADE', 'dispositivo:tipo', 'Windows'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^put\s+'\w+'\s*,\s*'\w+'(\s*,\s*'\w+:\w+'\s*,\s*'.*')*$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return output.includes('Dato(s) insertado(s)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 3: Escanear toda la tabla. Usa `scan 'nombre_tabla'` para ver todos los datos insertados.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Visualizar todas las filas y columnas presentes en la tabla 'usuarios'.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `scan` se usa para iterar sobre las filas de una tabla de HBase, mostrando todos los datos que contienen. Por defecto, escanea desde el principio hasta el final de la tabla, ordenado por clave de fila.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Simplemente escribe `scan` seguido del nombre de la tabla entre comillas simples.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "scan 'usuarios'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^scan\s+'\w+'$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const match = command.match(/^scan\s+'(\w+)'$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return output.includes('row(s) in');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 4: Inserta más datos para practicar escaneos con rangos. Añade usuarios con nombres que empiecen por 'C', 'D', 'E', 'F', incluyendo también su tipo de dispositivo y curso. Recuerda que puedes usar un solo comando `put` para múltiples columnas.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Expandir la tabla 'usuarios' con más datos para tener un conjunto más amplio para las búsquedas por rango.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "Seguimos usando `put` para añadir nuevas filas y columnas. Es importante usar claves de fila que permitan un ordenamiento alfabético para los escaneos por rango.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Inserta más usuarios, asegurándote de que sus claves de fila (nombres) sigan un orden alfabético para que los escaneos por rango funcionen como se espera. Incluye el tipo de dispositivo y el curso en un solo comando `put` por fila.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "put 'usuarios', 'carlos', 'info:curso', 'Big Data', 'dispositivo:tipo', 'Linux'\nput 'usuarios', 'david', 'info:curso', 'ADE', 'dispositivo:tipo', 'Windows'\nput 'usuarios', 'elena', 'info:curso', 'Big Data', 'dispositivo:tipo', 'Mac'\nput 'usuarios', 'fernando', 'info:curso', 'ADE', 'dispositivo:tipo', 'Linux'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^put\s+'\w+'\s*,\s*'\w+'(\s*,\s*'\w+:\w+'\s*,\s*'.*')*$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return output.includes('Dato(s) insertado(s)');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 5: Escanear hasta una clave de fila (STOPROW). Usa `scan 'nombre_tabla', {STOPROW =&gt; 'M'}`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Visualizar todas las filas desde el principio de la tabla hasta una clave de fila específica, excluyendo la clave de fila de parada.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `scan` permite especificar opciones para filtrar los resultados. `STOPROW` define la clave de fila hasta la cual se escaneará (exclusiva).",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Después del nombre de la tabla, añade un objeto entre llaves `{}` con la opción `STOPROW =&gt; 'TuClaveDeParada'`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "scan 'usuarios', {STOPROW =&gt; 'M'}",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^scan\s+'\w+'\s*,\s*\{STOPROW\s*=&gt;\s*'.*'\}$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const match = command.match(/^scan\s+'\w+'\s*,\s*\{STOPROW\s*=&gt;\s*'(\w+)'\}$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = match[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const stopRow = match[2];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const allDisplayedRowKeys = (output.match(/ROW\s+(\w+)/g) || []).map(m =&gt; m.match(/ROW\s+(\w+)/)[1]);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return output.includes('row(s) in') &amp;&amp; allDisplayedRowKeys.every(key =&gt; key.localeCompare(stopRow) &lt; 0);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 6: Escanear un rango de claves de fila (STARTROW y STOPROW). Usa `scan 'nombre_tabla', {STARTROW =&gt; 'C', STOPROW =&gt; 'F'}`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Visualizar las filas que se encuentran dentro de un rango específico de claves de fila (inclusive la de inicio, exclusiva la de fin).",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "Combinando `STARTROW` y `STOPROW` en el comando `scan`, puedes definir un rango preciso de filas a escanear. `STARTROW` es la clave de fila desde la que se comienza a escanear (inclusive).",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Dentro del objeto de opciones, especifica tanto `STARTROW` como `STOPROW` con sus respectivas claves de fila.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "scan 'usuarios', {STARTROW =&gt; 'C', STOPROW =&gt; 'F'}",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^scan\s+'\w+'\s*,\s*\{STARTROW\s*=&gt;\s*'.*',\s*STOPROW\s*=&gt;\s*'.*'\}$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const match = command.match(/^scan\s+'\w+'\s*,\s*\{STARTROW\s*=&gt;\s*'(\w+)',\s*STOPROW\s*=&gt;\s*'(\w+)'\}$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = match[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const startRow = match[2];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const stopRow = match[3];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const allDisplayedRowKeys = (output.match(/ROW\s+(\w+)/g) || []).map(m =&gt; m.match(/ROW\s+(\w+)/)[1]);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const allWithinRange = allDisplayedRowKeys.every(key =&gt; key.localeCompare(startRow) &gt;= 0 &amp;&amp; key.localeCompare(stopRow) &lt; 0);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return output.includes('row(s) in') &amp;&amp; allWithinRange &amp;&amp; allDisplayedRowKeys.length &gt; 0;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 7: Buscar usuarios por un curso específico (ej: 'Big Data') y mostrar **todas las columnas** de esos usuarios.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Encontrar todos los usuarios que están inscritos en el curso 'Big Data' y mostrar **toda la información disponible** para esos usuarios (curso, dispositivo, etc.).",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `scan` permite usar `SingleColumnValueFilter` para filtrar filas basándose en el valor de una columna específica. Esto es útil para encontrar filas que cumplen una condición sin escanear toda la tabla. Al no especificar la opción `COLUMNS`, se mostrarán todas las columnas de las filas que cumplan el filtro.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Usa `scan 'nombre_tabla', {FILTER =&gt; \"SingleColumnValueFilter('familia', 'calificador', '=', 'binary:ValorBuscado')\"}`. Asegúrate de que el valor buscado coincida exactamente. Para este ejercicio, el filtro es por `info:curso`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "scan 'usuarios', {FILTER =&gt; \"SingleColumnValueFilter('info', 'curso', '=', 'binary:Big Data')\"}", // COLUMNS option removed</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^scan\s+'\w+'\s*,\s*\{FILTER\s*=&gt;\s*".*"\}$/i, // Adjusted regex</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Check if scan was executed and if 'Big Data' is present in the output.</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// We expect 'dispositivo:tipo' to be present if applicable, as COLUMNS is not used.</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return output.includes('row(s) in') &amp;&amp; output.includes('Big Data');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 8: Buscar usuarios por un tipo de dispositivo específico (ej: 'Windows') y mostrar solo la columna del dispositivo.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Encontrar todos los usuarios que utilizan un dispositivo 'Windows' y mostrar **solo la información de su dispositivo**, ocultando otras columnas como el curso.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "Similar al ejercicio anterior, usamos `SingleColumnValueFilter` para el filtro y `COLUMNS` para la selección de columnas. Esto demuestra cómo puedes filtrar por un valor y al mismo tiempo limitar las columnas que se muestran en la salida.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Usa `scan 'nombre_tabla', {FILTER =&gt; \"SingleColumnValueFilter('familia', 'calificador', '=', 'binary:ValorBuscado')\", COLUMNS =&gt; ['familia:calificador']}`. Para este ejercicio, la columna a mostrar es `dispositivo:tipo`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "scan 'usuarios', {FILTER =&gt; \"SingleColumnValueFilter('dispositivo', 'tipo', '=', 'binary:Windows')\", COLUMNS =&gt; ['dispositivo:tipo']}",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^scan\s+'\w+'\s*,\s*\{FILTER\s*=&gt;\s*".*",\s*COLUMNS\s*=&gt;\s*\[.*\]\}$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Check if scan was executed and if 'Windows' is present in the output, and 'info:curso' is NOT</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return output.includes('row(s) in') &amp;&amp; output.includes('Windows') &amp;&amp; !output.includes('info:curso');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 9: Obtener un dato específico. Usa `get 'nombre_tabla', 'clave_fila'`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Recuperar todos los datos asociados a una clave de fila específica.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `get` es la forma más directa de recuperar una fila completa (o partes de ella) de una tabla de HBase, basándose en su clave de fila única.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Especifica el nombre de la tabla y la clave de fila de la que quieres obtener los datos.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "get 'usuarios', 'maria'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^get\s+'\w+'\s*,\s*'.*'$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const match = command.match(/^get\s+'(\w+)'\s*,\s*'.*'$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = match[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const rowKey = match[2];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return output.includes(`ROW ${rowKey}`) &amp;&amp; output.includes('row(s) in');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "Ejercicio 10: Deshabilitar y eliminar una tabla. Primero deshabilita: `disable 'nombre_tabla'`. Luego elimina: `drop 'nombre_tabla'`.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: "Remover completamente una tabla de HBase. Este es un proceso de dos pasos para evitar eliminaciones accidentales de tablas activas.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>function: "El comando `disable` pone una tabla fuera de línea, impidiendo operaciones de lectura/escritura. El comando `drop` elimina la tabla y todos sus datos de forma permanente. Una tabla debe estar deshabilitada para poder ser eliminada.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>howTo: "Primero, usa `disable` con el nombre de la tabla. Una vez deshabilitada, usa `drop` con el nombre de la tabla.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: "disable 'usuarios'\ndrop 'usuarios'",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: /^(disable|drop)\s+'\w+'$/i,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: (command, output) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const disableMatch = command.match(/^disable\s+'(\w+)'$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const dropMatch = command.match(/^drop\s+'(\w+)'$/i);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (disableMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = disableMatch[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return hbaseData[tableName] &amp;&amp; hbaseData[tableName].enabled === false &amp;&amp; output.includes('Tabla deshabilitada');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (dropMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const tableName = dropMatch[1];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>return !hbaseData[tableName] &amp;&amp; output.includes('Tabla eliminada');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>return false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>{</p>
+<p class="p1"><span class="Apple-converted-space">                </span>text: "¡Felicidades! Has completado todos los ejercicios básicos de HBase. Puedes seguir experimentando con los comandos.",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>whatToDo: null, function: null, howTo: null,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exampleCode: null,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>expectedCommand: null,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>check: () =&gt; true</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Loads the current exercise text and example code.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function loadExercise() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (currentExerciseIndex &lt; exercises.length) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const exercise = exercises[currentExerciseIndex];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exerciseInstruction.textContent = exercise.text;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Display additional info</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exerciseDetails.innerHTML = ''; // Clear previous details</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (exercise.whatToDo) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exerciseDetails.innerHTML += `&lt;p class="mt-2 font-semibold"&gt;¿Qué queremos hacer?&lt;/p&gt;&lt;p&gt;${exercise.whatToDo}&lt;/p&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (exercise.function) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exerciseDetails.innerHTML += `&lt;p class="mt-2 font-semibold"&gt;¿Cuál es la función?&lt;/p&gt;&lt;p&gt;${exercise.function}&lt;/p&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (exercise.howTo) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exerciseDetails.innerHTML += `&lt;p class="mt-2 font-semibold"&gt;¿Cómo se hace?&lt;/p&gt;&lt;p&gt;${exercise.howTo}&lt;/p&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Clear previous examples</p>
+<p class="p1"><span class="Apple-converted-space">                </span>exerciseExamplesContainer.innerHTML = '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (exercise.exampleCode) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const exampleCommands = exercise.exampleCode.split('\n').map(line =&gt; line.trim()).filter(line =&gt; line.length &gt; 0);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>exampleCommands.forEach(cmdLine =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const container = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>container.classList.add('copy-code-container');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const pre = document.createElement('pre');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>pre.textContent = cmdLine;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const button = document.createElement('button');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>button.classList.add('copy-btn');</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>button.innerHTML = '&lt;i class="fas fa-copy"&gt;&lt;/i&gt; Copiar';</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>button.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>copyToClipboard(cmdLine);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>container.appendChild(pre);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>container.appendChild(button);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>exerciseExamplesContainer.appendChild(container);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (currentExerciseIndex === exercises.length - 1) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>nextExerciseBtn.disabled = true; // Disable if all exercises are done</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>nextExerciseBtn.disabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Moves to the next exercise.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function nextExercise() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (currentExerciseIndex &lt; exercises.length - 1) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>currentExerciseIndex++;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>loadExercise();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput("\n--- Nuevo Ejercicio ---\n");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Copies text to clipboard.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} text - The text to copy.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function copyToClipboard(text) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const textArea = document.createElement("textarea");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>textArea.value = text;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>textArea.style.position = "fixed";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>textArea.style.left = "-9999px";</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.body.appendChild(textArea);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>textArea.focus();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>textArea.select();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.execCommand('copy');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} catch (err) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error('Error al copiar el texto:', err);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput("Error al copiar el comando.", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} finally {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>document.body.removeChild(textArea);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Funciones de la consola ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Appends a message to the console output.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} message - The message to display.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} type - 'info', 'success', or 'error' for styling.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function appendOutput(message, type = 'info') {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const line = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>line.textContent = message;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (type === 'success') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.classList.add('success-message');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else if (type === 'error') {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.classList.add('error-message');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>consoleOutput.appendChild(line);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>consoleOutput.scrollTop = consoleOutput.scrollHeight;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Appends raw HTML to the console output (for formatted tables).</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} htmlString - The HTML string to append.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function appendHtmlOutput(htmlString) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const tempDiv = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>tempDiv.innerHTML = htmlString;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>consoleOutput.appendChild(tempDiv);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>consoleOutput.scrollTop = consoleOutput.scrollHeight;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Generates a simulated timestamp.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @returns {string} A timestamp string.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function getSimulatedTimestamp() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const now = new Date();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>return now.getTime().toString();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'create' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string[]} columnFamilies - Array of column family names.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function createTable(tableName, columnFamilies) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' ya existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>hbaseData[tableName] = {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enabled: true,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>columnFamilies: columnFamilies,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rows: {}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>};</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`Tabla '${tableName}' creada con familias de columnas: ${columnFamilies.join(', ')}.`, 'success');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`0 row(s) in 0.0050 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'list' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function listTables() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const tables = Object.keys(hbaseData);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (tables.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput("No hay tablas en HBase.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0010 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("Tablas en HBase:");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>tables.forEach(table =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const status = hbaseData[table].enabled ? 'ENABLED' : 'DISABLED';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(` - ${table} (${status})`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`${tables.length} row(s) in 0.0020 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'put' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} rowKey - The row key.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {Array&lt;string&gt;} columnQualifierValuePairs - An array of [colQualifier, value] pairs.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function putData(tableName, rowKey, columnQualifierValuePairs) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe. Por favor, asegúrate de crearla primero con el comando 'create'.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' está deshabilitada. Habilítala primero con el comando 'enable'.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName].rows[rowKey]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>hbaseData[tableName].rows[rowKey] = {};</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let successfulPuts = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; columnQualifierValuePairs.length; i += 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const columnQualifier = columnQualifierValuePairs[i];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const value = columnQualifierValuePairs[i + 1];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const [cf, col] = columnQualifier.split(':');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!hbaseData[tableName].columnFamilies.includes(cf)) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>appendOutput(`Error: La familia de columnas '${cf}' no existe en la tabla '${tableName}'. Asegúrate de haberla incluido al crear la tabla.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>continue; // Skip this pair but try others</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>hbaseData[tableName].rows[rowKey][columnQualifier] = value;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>successfulPuts++;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (successfulPuts &gt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Dato(s) insertado(s) en '${tableName}', clave '${rowKey}'. Total de celdas actualizadas: ${successfulPuts}.`, 'success');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`1 row(s) in 0.0030 seconds`); // Corrected output for put</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`No se insertaron datos en '${tableName}', clave '${rowKey}'. Revisa los errores.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0030 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'get' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} rowKey - The row key.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function getData(tableName, rowKey) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' está deshabilitada. Habilítala primero.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const row = hbaseData[tableName].rows[rowKey];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!row) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`No se encontró la clave de fila '${rowKey}' en la tabla '${tableName}'.`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0020 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let outputHtml = `&lt;table class="hbase-output-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;COLUMN&lt;/th&gt;&lt;th&gt;CELL&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let cellCount = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (const colQualifier in row) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const timestamp = getSimulatedTimestamp();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>outputHtml += `&lt;tr&gt;&lt;td&gt; ${colQualifier} &lt;/td&gt;&lt;td&gt; timestamp=${timestamp}, value=${row[colQualifier]} &lt;/td&gt;&lt;/tr&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cellCount++;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>outputHtml += `&lt;/tbody&gt;&lt;/table&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendHtmlOutput(outputHtml);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`${cellCount &gt; 0 ? 1 : 0} row(s) in 0.0030 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'scan' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string|null} startRow - Optional start row key (inclusive).</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string|null} stopRow - Optional stop row key (exclusive).</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {Array&lt;string&gt;|null} columnsToDisplay - Optional array of column qualifiers to display.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string|null} filterString - Optional filter string (e.g., "SingleColumnValueFilter(...)").</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function scanTable(tableName, startRow = null, stopRow = null, columnsToDisplay = null, filterString = null) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' está deshabilitada. Habilítala primero.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rows = hbaseData[tableName].rows;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let rowKeys = Object.keys(rows).sort(); // Always start with sorted keys</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let filteredRowKeys = rowKeys.filter(key =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let include = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Apply STARTROW and STOPROW filters</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (startRow !== null &amp;&amp; key.localeCompare(startRow) &lt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>include = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (stopRow !== null &amp;&amp; key.localeCompare(stopRow) &gt;= 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>include = false;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// --- Simulated Filter Logic (SingleColumnValueFilter) ---</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (include &amp;&amp; filterString) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const filterMatch = filterString.match(/SingleColumnValueFilter\('([^']*)',\s*'([^']*)',\s*'([^']*)',\s*'binary:([^']*)'\)/);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (filterMatch) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const [, cf, qualifier, operator, filterValue] = filterMatch;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const fullQualifier = `${cf}:${qualifier}`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const rowData = rows[key];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (rowData &amp;&amp; rowData[fullQualifier]) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// Simple equality check for simulation</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (operator === '=' &amp;&amp; rowData[fullQualifier] !== filterValue) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>include = false;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// Could add more operators here if needed (e.g., '&gt;', '&lt;', '!=')</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// If column doesn't exist in row, it doesn't match filter</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>include = false;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>appendOutput(`Advertencia: Filtro no reconocido o mal formado: "${filterString}". Se ignorará.`, 'info');</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return include;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let rowCount = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>let cellCount = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>let outputHtml = `&lt;table class="hbase-output-table"&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;ROW&lt;/th&gt;&lt;th&gt;COLUMN+CELL&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (filteredRowKeys.length === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Escaneando tabla '${tableName}': 0 filas encontradas.`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0010 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>filteredRowKeys.forEach(rowKey =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const row = rows[rowKey];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let firstCellOfRow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let rowHasDisplayedContent = false; // Track if any cell in this row is displayed</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Iterate over all columns in the row</p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (const colQualifier in row) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// --- Simulated Column Filtering (COLUMNS option) ---</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (columnsToDisplay &amp;&amp; !columnsToDisplay.includes(colQualifier)) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>continue; // Skip this column if it's not in the specified columnsToDisplay array</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const timestamp = getSimulatedTimestamp();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (firstCellOfRow) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>outputHtml += `&lt;tr&gt;&lt;td&gt; ${rowKey} &lt;/td&gt;&lt;td&gt; column=${colQualifier}, timestamp=${timestamp}, value=${row[colQualifier]} &lt;/td&gt;&lt;/tr&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>firstCellOfRow = false;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>outputHtml += `&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt; column=${colQualifier}, timestamp=${timestamp}, value=${row[colQualifier]} &lt;/td&gt;&lt;/tr&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>cellCount++;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>rowHasDisplayedContent = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Only increment rowCount if at least one cell was displayed for the row after column filtering</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (rowHasDisplayedContent) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>rowCount++;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>outputHtml += `&lt;/tbody&gt;&lt;/table&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendHtmlOutput(outputHtml);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`${rowCount} row(s) in 0.0050 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'disable' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function disableTable(tableName) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`La tabla '${tableName}' ya está deshabilitada.`, 'info');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0010 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>hbaseData[tableName].enabled = false;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`Tabla '${tableName}' deshabilitada.`, 'success');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`0 row(s) in 0.0020 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'enable' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function enableTable(tableName) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`La tabla '${tableName}' ya está habilitada.`, 'info');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`0 row(s) in 0.0010 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>hbaseData[tableName].enabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`Tabla '${tableName}' habilitada.`, 'success');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`0 row(s) in 0.0020 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Simulates HBase 'drop' command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} tableName - Name of the table.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function dropTable(tableName) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!hbaseData[tableName]) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' no existe.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (hbaseData[tableName].enabled) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`Error: La tabla '${tableName}' debe estar deshabilitada antes de poder eliminarla.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>delete hbaseData[tableName];</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`Tabla '${tableName}' eliminada.`, 'success');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`0 row(s) in 0.0020 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Displays help message.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function showHelp() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("Comandos disponibles (simulados):");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>create 'nombre_tabla', 'cf1', 'cf2', ... - Crea una tabla.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>list - Lista todas las tablas.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>put 'nombre_tabla', 'clave_fila', 'cf:calificador', 'valor', ... - Inserta/actualiza uno o varios datos en una fila.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>get 'nombre_tabla', 'clave_fila' - Obtiene una fila.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>scan 'nombre_tabla' [,{STARTROW =&gt; 'fila_inicio', STOPROW =&gt; 'fila_fin', COLUMNS =&gt; ['cf:q'], FILTER =&gt; \"...\"}] - Escanea filas.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>disable 'nombre_tabla' - Deshabilita una tabla.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>enable 'nombre_tabla' - Habilita una tabla.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>drop 'nombre_tabla' - Elimina una tabla (debe estar deshabilitada).");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput("<span class="Apple-converted-space">  </span>help - Muestra esta ayuda.");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>appendOutput(`0 row(s) in 0.0010 seconds`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/**</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* Processes the user command.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>* @param {string} command - The command string from the input.</p>
+<p class="p1"><span class="Apple-converted-space">         </span>*/</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function processCommand(command) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>command = command.trim();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (!command) return;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Split commands by newline and process each one</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const commands = command.split('\n').map(line =&gt; line.trim()).filter(line =&gt; line.length &gt; 0);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (const singleCommand of commands) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput(`&gt; ${singleCommand}`); // Echo each sub-command</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lastOutput = consoleOutput.lastChild;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (lastOutput &amp;&amp; (lastOutput.classList.contains('success-message') || lastOutput.classList.contains('error-message'))) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>consoleOutput.removeChild(lastOutput);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Improved parsing for scan options</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const parts = [];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const regex = /'[^']+'|\{[^}]+\}|[^\s,]+/g; // Match quoted strings, {...} blocks, or non-whitespace/comma</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let match;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>while ((match = regex.exec(singleCommand)) !== null) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (match[0] !== ',') { // Filter out standalone commas</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>parts.push(match[0]);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const cmd = parts[0] ? parts[0].toLowerCase() : '';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>switch (cmd) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'create':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length &gt;= 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const columnFamilies = parts.slice(2).map(p =&gt; p.replace(/'/g, ''));</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>createTable(tableName, columnFamilies);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: create 'nombre_tabla', 'cf1', 'cf2', ...", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'list':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>listTables();</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'put':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// put 'table', 'rowkey', 'cf:qualifier1', 'value1', 'cf:qualifier2', 'value2', ...</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>// Check if there are enough parts for table, rowkey, and at least one cf:q, value pair</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length &gt;= 5 &amp;&amp; (parts.length - 3) % 2 === 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const rowKey = parts[2].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const columnQualifierValuePairs = parts.slice(3).map(p =&gt; p.replace(/'/g, ''));</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>putData(tableName, rowKey, columnQualifierValuePairs);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: put 'nombre_tabla', 'clave_fila', 'cf:calificador', 'valor', ['cf:calificador', 'valor', ...]", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'get':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length === 3) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const rowKey = parts[2].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>getData(tableName, rowKey);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: get 'nombre_tabla', 'clave_fila'", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'scan':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length &gt;= 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>let startRow = null;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>let stopRow = null;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>let columnsToDisplay = null;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>let filterString = null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                                </span>if (parts.length &gt; 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>// The options string is the part inside the curly braces {}</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>const optionsPart = parts.slice(2).join(' '); // Rejoin to get the full options string</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>const options = parseScanOptions(optionsPart);</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>startRow = options.startRow || null;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>stopRow = options.stopRow || null;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>columnsToDisplay = options.columns || null;</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>filterString = options.filter || null;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>scanTable(tableName, startRow, stopRow, columnsToDisplay, filterString);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: scan 'nombre_tabla' [,{STARTROW =&gt; 'fila_inicio', STOPROW =&gt; 'fila_fin', COLUMNS =&gt; ['cf:q'], FILTER =&gt; \"...\"}]", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'disable':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length === 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>disableTable(tableName);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: disable 'nombre_tabla'", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'enable':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length === 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>enableTable(tableName);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: enable 'nombre_tabla'", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'drop':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>if (parts.length === 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>const tableName = parts[1].replace(/'/g, '');</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>dropTable(tableName);</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>appendOutput("Uso: drop 'nombre_tabla'", 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>case 'help':</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>showHelp();</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>default:</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>appendOutput(`Comando desconocido: ${singleCommand}. Escribe 'help' para ver los comandos.`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>break;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>appendOutput(`Error interno: ${e.message}`, 'error');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} // End of for loop for singleCommand</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Check if current exercise is completed after all commands in the input have been processed</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (exercises[currentExerciseIndex] &amp;&amp; exercises[currentExerciseIndex].check(command, consoleOutput.textContent)) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>appendOutput("\n¡Ejercicio completado! Haz clic en 'Siguiente Ejercicio'.", 'success');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Initial load and event listeners setup</p>
+<p class="p1"><span class="Apple-converted-space">        </span>window.onload = function() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadExercise();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>runCommandBtn.addEventListener('click', () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>processCommand(commandInput.value);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>commandInput.value = '';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>nextExerciseBtn.addEventListener('click', nextExercise);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>function handleInput(event) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (event.key === 'Enter') {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>processCommand(commandInput.value);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>commandInput.value = '';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
